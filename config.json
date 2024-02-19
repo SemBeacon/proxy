@@ -1,0 +1,15 @@
+{
+    "applications": [
+        {
+            "id": "example",
+            "name": "Example Application",
+            "key": "test123",
+            "limit": "1MB",
+            "accept": ["application/rdf+xml", "application/ld+json", "text/turtle"]
+        }
+    ],
+    "port": "4899",
+    "log": {
+        "level": "debug"
+    }
+}
