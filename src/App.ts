@@ -133,8 +133,13 @@ export class App {
                         timeout: app.timeout || 5000,
                     }
                 ).then((response) => {
+                    const finalURL = response.request.responseUrl ??
+                        response.request.responseURL ?? (response.request.res ? response.request.res.responseUrl : "");
                     res.status(response.status)
-                        .header(response.headers)
+                        .header({
+                            ...response.headers,
+                            'x-final-url': finalURL
+                        })
                         .send(response.data);
                 }).catch((error) => {
                     this.logger.error('Error proxying request to: ' + targetURL + ' from API: ' + api, error);
