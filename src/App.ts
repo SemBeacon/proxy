@@ -59,7 +59,15 @@ export class App {
         this.app.use(
             expressWinston.logger({
                 transports: [
-                    new logger.transports.Console(),
+                    new logger.transports.Console({
+                        format: logger.format.combine(
+                            logger.format.colorize({ all: true }),
+                            logger.format.timestamp({
+                                format: 'YYYY-MM-DD HH:mm:ss',
+                            }),
+                            logger.format.printf((i) => `<${process.pid}> [${i.timestamp}] ${i.message}`),
+                        ),
+                    }),
                     new logger.transports.DailyRotateFile({
                         level: 'debug',
                         dirname: 'logs',
@@ -78,13 +86,6 @@ export class App {
                     })
                 ],
                 level: 'info',
-                format: logger.format.combine(
-                    logger.format.colorize({ all: true }),
-                    logger.format.timestamp({
-                        format: 'YYYY-MM-DD HH:mm:ss',
-                    }),
-                    logger.format.printf((i) => `<${process.pid}> [${i.timestamp}] ${i.message}`),
-                ),
                 msg: () => {
                     const expressMsgFormat =
                         chalk.gray('From {{req.ip}} - {{req.method}} {{req.url}}') +
@@ -98,7 +99,7 @@ export class App {
             }),
         );
         this.app.use(bodyParser.json());
-
+        this.app.disable('etag');
         this.app.all('/', (req: express.Request, res: express.Response, next: express.NextFunction) => {
             // Set CORS headers: allow all origins, methods, and headers: you may want to lock this down in a production environment
             res.header('Access-Control-Allow-Origin', '*');
@@ -122,14 +123,12 @@ export class App {
                     return;
                 }
                 this.logger.info('Proxying request to: ' + targetURL + ' from API: ' + api);
-                this.logger.debug('Request headers: ' + JSON.stringify(req.headers));
                 axios(targetURL,
                     {
                         method: req.method,
                         withCredentials: false,
                         headers: {
-                            ...req.headers,
-                            'Host': undefined,
+                            'Accept': req.header('Accept')
                         },
                         timeout: app.timeout || 5000,
                     }
@@ -138,6 +137,7 @@ export class App {
                         .header(response.headers)
                         .send(response.data);
                 }).catch((error) => {
+                    this.logger.error('Error proxying request to: ' + targetURL + ' from API: ' + api, error);
                     res.status(500).send({ error: error.message });
                 });
             }

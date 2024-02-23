@@ -1,0 +1,15 @@
+version: '3'
+services:
+  proxy:
+    container_name: 'proxy'
+    build: .
+    ports:
+      - "4899:4899"
+    volumes:
+      - ./logs:/opt/proxy/logs
+    configs:
+      - source: proxy_config
+        target: /opt/proxy/config.json
+configs:
+  proxy_config:
+    file: ./config.json

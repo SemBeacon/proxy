@@ -11,12 +11,29 @@ This repository contains a server for proxying linked data requests.
 
 ### Installation
 ```text
-npm install
+yarn install
 ```
 
-```text
-
+### Configuration
+```json
+{
+    "applications": [
+        {
+            "id": "example",
+            "name": "Example Application",
+            "key": "test123",
+            "limit": "1MB",
+            "accept": ["application/rdf+xml", "application/ld+json", "text/turtle"]
+        }
+    ],
+    "port": "4899",
+    "log": {
+        "level": "debug"
+    }
+}
 ```
+
+### Docker
 
 ## Contributors
 The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.
