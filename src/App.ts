@@ -101,10 +101,12 @@ export class App {
         this.app.use(bodyParser.json());
         this.app.disable('etag');
         this.app.all('/', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-            // Set CORS headers: allow all origins, methods, and headers: you may want to lock this down in a production environment
+            // Set CORS headers
+            res.header('Access-Control-Allow-Private-Network', 'true');
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Methods', 'GET, PUT, PATCH, POST, DELETE');
             res.header('Access-Control-Allow-Headers', req.header('access-control-request-headers'));
+            res.header('Access-Control-Expose-Headers', 'x-final-url');
 
             if (req.method === 'OPTIONS') {
                 // CORS Preflight
