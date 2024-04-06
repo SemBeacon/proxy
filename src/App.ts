@@ -102,15 +102,16 @@ export class App {
         this.app.disable('etag');
         this.app.all('/', (req: express.Request, res: express.Response, next: express.NextFunction) => {
             // Set CORS headers
-            res.header('Access-Control-Allow-Private-Network', 'true');
-            res.header('Access-Control-Allow-Origin', '*');
-            res.header('Access-Control-Allow-Methods', 'GET, PUT, PATCH, POST, DELETE');
-            res.header('Access-Control-Allow-Headers', req.header('access-control-request-headers'));
-            res.header('Access-Control-Expose-Headers', 'x-final-url');
+            res.header('access-control-allow-private-network', 'true');
+            res.header('access-control-allow-origin', '*');
+            res.header('access-control-allow-methods', 'GET, PUT, PATCH, POST, DELETE');
+            res.header('access-control-allow-headers', req.header('access-control-request-headers'));
+            res.header('access-control-expose-headers', 'x-final-url');
 
             if (req.method === 'OPTIONS') {
                 // CORS Preflight
                 res.send();
+                return;
             } else {
                 const api = req.query.api as string;
                 const app = this.getApplication(api);
@@ -119,6 +120,8 @@ export class App {
                     return;
                 }
 
+                const removeHeaders = req.query.headers as string === '0';
+                
                 const targetURL = req.query.uri as string;
                 if (!targetURL) {
                     res.status(500).send({ error: 'Please provide an uri= GET paremeter!' });
@@ -135,13 +138,27 @@ export class App {
                         timeout: app.timeout || 5000,
                     }
                 ).then((response) => {
-                    const finalURL = response.request.responseUrl ??
+                    const responseUrl = response.request.responseUrl ??
                         response.request.responseURL ?? (response.request.res ? response.request.res.responseUrl : "");
+                    const finalURL = targetURL.startsWith(responseUrl) ? targetURL : responseUrl
+                    this.logger.debug(`[${response.status}]${removeHeaders ? "[NO HEADERS]" : ""} Proxying result ${finalURL}`);
+                    const responseHeaders = {
+                        ...(removeHeaders ? {} : response.headers),
+                        'x-final-url': finalURL,
+                    };
+                    if (!removeHeaders) {
+                        delete responseHeaders['connection'];
+                        delete responseHeaders['vary'];
+                        delete responseHeaders['etag'];
+                        delete responseHeaders['date'];
+                        delete responseHeaders['transfer-encoding'];
+                        delete responseHeaders['allow'];
+                        delete responseHeaders['access-control-allow-origin'];
+                        delete responseHeaders['access-control-expose-headers'];
+                        delete responseHeaders['access-control-allow-credentials'];
+                    }
                     res.status(response.status)
-                        .header({
-                            ...response.headers,
-                            'x-final-url': targetURL.startsWith(finalURL) ? targetURL : finalURL
-                        })
+                        .set(responseHeaders)
                         .send(response.data);
                 }).catch((error) => {
                     this.logger.error('Error proxying request to: ' + targetURL + ' from API: ' + api, error);
