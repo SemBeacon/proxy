@@ -140,7 +140,7 @@ export class App {
                     res.status(response.status)
                         .header({
                             ...response.headers,
-                            'x-final-url': finalURL
+                            'x-final-url': targetURL.startsWith(finalURL) ? targetURL : finalURL
                         })
                         .send(response.data);
                 }).catch((error) => {

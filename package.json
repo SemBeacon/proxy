@@ -4,6 +4,7 @@
   "description": "SemBeacon Linked Data Proxy",
   "scripts": {
     "start": "node dist/cjs/bin/start.js",
+    "debug": "ts-node src/bin/start.ts",
     "test": "mocha --config test/.mocharc.json",
     "cover": "nyc mocha --config test/.mocharc.json && nyc report --reporter=cobertura",
     "cover:ci": "nyc mocha --config test/.mocharc.json --reporter mocha-junit-reporter && nyc report --reporter=cobertura",
