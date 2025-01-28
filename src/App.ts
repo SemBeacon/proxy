@@ -156,7 +156,15 @@ export class App {
             // Only allow specific accept headers
             if (app.accept && app.accept.length > 0) {
                 const acceptHeader = req.header('Accept');
-                if (!acceptHeader || !app.accept.includes(acceptHeader)) {
+                if (!acceptHeader) {
+                    res.status(500).send({ error: 'Accept header is required!' });
+                    return;
+                }
+
+                const acceptedTypes = acceptHeader.split(',').map((type) => type.split(';')[0].trim());
+                const isValidAcceptHeader = acceptedTypes.some((type) => app.accept.includes(type));
+
+                if (!isValidAcceptHeader) {
                     res.status(500).send({ error: 'Invalid Accept header!' });
                     return;
                 }
