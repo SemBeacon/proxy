@@ -5,4 +5,5 @@ export interface Application {
     limit?: string;
     timeout?: number;
     accept?: string[];
+    cacheTimeout?: number;
 }

@@ -5,7 +5,8 @@
             "name": "Example Application",
             "key": "test123",
             "limit": "1MB",
-            "accept": ["application/rdf+xml", "application/ld+json", "text/turtle"]
+            "accept": ["application/rdf+xml", "application/ld+json", "text/turtle"],
+            "cacheTimeout": 3600
         }
     ],
     "port": "4899",

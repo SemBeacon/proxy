@@ -1,15 +1,33 @@
 version: '3'
+
 services:
   proxy:
     container_name: 'proxy'
     build: .
     ports:
       - "4899:4899"
+    environment: &env
+      # Cache
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_USER: default
+      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     volumes:
       - ./logs:/opt/proxy/logs
     configs:
       - source: proxy_config
         target: /opt/proxy/config.json
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    environment: *env
+    command: sh -c 'redis-server --loglevel warning --requirepass "$$REDIS_PASSWORD"'
+    volumes: 
+      - cache:/data
+
 configs:
   proxy_config:
     file: ./config.json
+volumes:
+  cache:
+    driver: local
