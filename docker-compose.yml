@@ -21,13 +21,9 @@ services:
     image: redis:6.2-alpine
     restart: always
     environment: *env
-    command: sh -c 'redis-server --loglevel warning --requirepass "$$REDIS_PASSWORD"'
-    volumes: 
-      - cache:/data
+    command: sh -c 'rm -f /data/dump.rdb && redis-server --loglevel warning --requirepass "$$REDIS_PASSWORD"'
 
 configs:
   proxy_config:
     file: ./config.json
-volumes:
-  cache:
-    driver: local
+

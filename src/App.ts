@@ -231,9 +231,10 @@ export class App {
                     delete responseHeaders['access-control-expose-headers'];
                     delete responseHeaders['access-control-allow-credentials'];
                 }
-                // Set response headers
+                // Set response headers and modify the axios response
                 Object.keys(responseHeaders).forEach((header) => {
                     res.setHeader(header, responseHeaders[header]);
+                    response.headers[header] = responseHeaders[header];
                 });
                 // Save response
                 this.setCachedResponse(app, targetURL, response);
