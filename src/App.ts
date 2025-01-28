@@ -179,6 +179,8 @@ export class App {
                         Object.keys(cachedResponse.headers).forEach((header) => {
                             res.setHeader(header, cachedResponse.headers[header]);
                         });
+                        // Set any cache related headers
+                        res.setHeader('x-cache-hit', 'true');
                         res.send(cachedResponse.data);
                         return;
                     }
@@ -229,9 +231,13 @@ export class App {
                     delete responseHeaders['access-control-expose-headers'];
                     delete responseHeaders['access-control-allow-credentials'];
                 }
+                // Set response headers
+                Object.keys(responseHeaders).forEach((header) => {
+                    res.setHeader(header, responseHeaders[header]);
+                });
                 // Save response
                 this.setCachedResponse(app, targetURL, response);
-                res.status(response.status).set(responseHeaders).send(response.data);
+                res.status(response.status).send(response.data);
             })
             .catch((error) => {
                 logger.error('Error proxying request to: ' + targetURL + ' from API: ' + app.id, error);

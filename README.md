@@ -15,7 +15,7 @@ yarn install
 ```
 
 ### Proxy requests
-`curl "http://localhost:4899/?uri=https://sembeacon.org/examples/openhps2021/beacons_v2.ttl&api=test123" --accept text/turtle`
+`curl --header "Accept: text/turtle" "http://localhost:4899/?uri=https://sembeacon.org/examples/openhps2021/beacons_v2.ttl&api=test123"`
 
 ### Configuration
 ```json
