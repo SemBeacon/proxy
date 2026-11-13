@@ -81,6 +81,11 @@ describe('resolvePublicAddresses', () => {
             assert.equal(error.status, 403);
             return true;
         });
+        await assert.rejects(resolvePublicAddresses('[::1]'), (error) => {
+            assert.ok(error instanceof ProxyRequestError);
+            assert.equal(error.status, 403);
+            return true;
+        });
     });
 });
 

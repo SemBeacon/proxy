@@ -83,11 +83,19 @@ function mappedIpv4(address: string): string | undefined {
 }
 
 /**
+ * Remove the brackets from an IPv6 literal hostname.
+ * @param hostname Hostname, possibly `[::1]`
+ */
+export function normalizeHostname(hostname: string): string {
+    return hostname.startsWith('[') && hostname.endsWith(']') ? hostname.slice(1, -1) : hostname;
+}
+
+/**
  * Hostnames that must not be resolved, even before DNS is consulted.
  * @param hostname Hostname without port
  */
 export function isBlockedHostname(hostname: string): boolean {
-    const host = hostname.toLowerCase().replace(/\.$/, '');
+    const host = normalizeHostname(hostname).toLowerCase().replace(/\.$/, '');
     if (host === 'localhost' || host === 'localhost.localdomain') {
         return true;
     }
@@ -99,18 +107,19 @@ export function isBlockedHostname(hostname: string): boolean {
  * @param hostname Hostname to resolve
  */
 export async function resolvePublicAddresses(hostname: string): Promise<dns.LookupAddress[]> {
-    if (isBlockedHostname(hostname)) {
+    const host = normalizeHostname(hostname);
+    if (isBlockedHostname(host)) {
         throw new ProxyRequestError(403, 'Host is not allowed');
     }
-    if (net.isIP(hostname)) {
-        if (isBlockedAddress(hostname)) {
+    if (net.isIP(host)) {
+        if (isBlockedAddress(host)) {
             throw new ProxyRequestError(403, 'Host is not allowed');
         }
-        return [{ address: hostname, family: net.isIPv4(hostname) ? 4 : 6 }];
+        return [{ address: host, family: net.isIPv4(host) ? 4 : 6 }];
     }
     let addresses: dns.LookupAddress[];
     try {
-        addresses = await dns.promises.lookup(hostname, { all: true, verbatim: true });
+        addresses = await dns.promises.lookup(host, { all: true, verbatim: true });
     } catch {
         throw new ProxyRequestError(502, 'Could not resolve host');
     }

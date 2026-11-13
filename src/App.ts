@@ -132,6 +132,8 @@ export class App {
             );
             this.app.use(bodyParser.json());
             this.app.disable('etag');
+            // One reverse proxy (nginx) terminates TLS and forwards X-Forwarded-For.
+            this.app.set('trust proxy', 1);
             this.app.all('/', (req: express.Request, res: express.Response) => {
                 this.proxyRequest(req, res).catch((error) => {
                     logger.error('Unhandled proxy error', error);
